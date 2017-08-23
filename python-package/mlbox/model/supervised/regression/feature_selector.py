@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import Lasso
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.feature_selection import SelectPercentile, f_regression, mutual_info_regression
 import warnings
 
 
@@ -20,7 +21,7 @@ class Reg_feature_selector():
     ----------
     strategy : str, defaut = "l1"
         The strategy to select features.
-        Available strategies = {"variance", "l1", "rf_feature_importance"}
+        Available strategies = {"variance", "l1", "rf_feature_importance", "f_regression", "mutual_info_regression"}
 
     threshold : float, defaut = 0.3
         The percentage of variable to discard according the strategy.
@@ -101,10 +102,26 @@ class Reg_feature_selector():
             abstract_threshold = np.percentile(coef, 100. * self.threshold)
             self.__to_discard = df_train.columns[coef < abstract_threshold]
             self.__fitOK = True
+           
+        elif(self.strategy == 'f_regression'):
+            model = SelectPercentile(f_regression, percentile=100)
+            model.fit(df_train, y_train)
+            coef = model.scores_
+            abstract_threshold = np.percentile(coef, 100.*self.threshold)
+            self.__to_discard = df_train.columns[coef < abstract_threshold]
+            self.__fitOK = True
+
+        elif(self.strategy == 'mutual_info_regression'):
+            model = SelectPercentile(mutual_info_regression, percentile=100)
+            model.fit(df_train, y_train)
+            coef = model.scores_
+            abstract_threshold = np.percentile(coef, 100.*self.threshold)
+            self.__to_discard = df_train.columns[coef < abstract_threshold]
+            self.__fitOK = True
 
         else:
             raise ValueError("Strategy invalid. Please choose between "
-                             "'variance', 'l1' or 'rf_feature_importance'")
+                             "'variance', 'l1', 'rf_feature_importance', 'f_regression' or 'mutual_info_regression'")
 
         return self
 
