@@ -73,7 +73,7 @@ def indicator(df, mode=False):
     return resume
 
 
-class Features_keeper():
+class Features_droper():
     """
     Selects useful features with less than threshold*100 percentage of NA
     Parameters
@@ -89,7 +89,7 @@ class Features_keeper():
 
     def fit(self, df_train, y_train=None):
         """
-        Fits Features_keep.
+        Fits Features_droper.
         Parameters
         ----------
         df_train : pandas dataframe of shape = (n_train, n_features)
