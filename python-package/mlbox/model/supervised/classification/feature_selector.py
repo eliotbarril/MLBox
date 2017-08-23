@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_selection import SelectPercentile, f_classif, mutual_info_classif, chi2
 import warnings
 
 
@@ -20,7 +21,7 @@ class Clf_feature_selector():
     ----------
     strategy : str, defaut = "l1"
         The strategy to select features.
-        Available strategies = {"variance", "l1", "rf_feature_importance"}
+        Available strategies = {"variance", "l1", "rf_feature_importance", "f_classif", "mutual_info_classif", "chi2"}
 
     threshold : float, defaut = 0.3
         The percentage of variable to discard according to the strategy.
@@ -106,10 +107,34 @@ class Clf_feature_selector():
             abstract_threshold = np.percentile(coef, 100. * self.threshold)
             self.__to_discard = df_train.columns[coef < abstract_threshold]
             self.__fitOK = True
+            
+        elif(self.strategy == 'f_classif'):
+            model = SelectPercentile(f_classif, percentile=100)
+            model.fit(df_train, y_train)
+            coef = model.scores_
+            abstract_threshold = np.percentile(coef, 100.*self.threshold)
+            self.__to_discard = df_train.columns[coef < abstract_threshold]
+            self.__fitOK = True
+            
+        elif(self.strategy == 'chi2'):
+            model = SelectPercentile(chi2, percentile=100)
+            model.fit(df_train, y_train)
+            coef = model.scores_
+            abstract_threshold = np.percentile(coef, 100.*self.threshold)
+            self.__to_discard = df_train.columns[coef < abstract_threshold]
+            self.__fitOK = True
+            
+        elif(self.strategy == 'mutual_info_classif'):
+            model = SelectPercentile(mutual_info_classif, percentile=100)
+            model.fit(df_train, y_train)
+            coef = model.scores_
+            abstract_threshold = np.percentile(coef, 100.*self.threshold)
+            self.__to_discard = df_train.columns[coef < abstract_threshold]
+            self.__fitOK = True
 
         else:
             raise ValueError("Strategy invalid. Please choose between "
-                             "'variance', 'l1' or 'rf_feature_importance'")
+                             "'variance', 'l1', 'rf_feature_importance', 'mutual_info_classif', 'chi2' or 'f_classif'")
 
         return self
 
